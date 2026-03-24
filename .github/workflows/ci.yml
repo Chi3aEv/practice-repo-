@@ -63,7 +63,7 @@ jobs:
         run: npm install
 
       - name: Run tests
-        run: npm test -- --watchAll=false --coverage
+        run: npm test
         env:
           CI: false
 
