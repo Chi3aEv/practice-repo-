@@ -1,5 +1,17 @@
 const request = require('supertest');
 const app = require('../server');
+const http = require('http');
+
+let server;
+
+beforeAll(() => {
+  server = http.createServer(app);
+  server.listen(0);
+});
+
+afterAll(async () => {
+  await server.close();
+});
 
 describe('Health Check', () => {
   it('GET /health should return ok', async () => {
