@@ -1,4 +1,3 @@
-// This tells Jest to ignore CSS imports so it doesn't crash
 jest.mock('react-toastify/dist/ReactToastify.css', () => ({}));
 jest.mock('react-toastify', () => ({
   ToastContainer: () => null,
