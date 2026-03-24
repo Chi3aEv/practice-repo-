@@ -1,43 +1,52 @@
-import React, { useState } from 'react';
-import LogAnalyzer from './components/LogAnalyzer';
-import MetricsDashboard from './components/MetricsDashboard';
-import AlertsPanel from './components/AlertsPanel';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+// This tells Jest to ignore CSS imports so it doesn't crash
+jest.mock('react-toastify/dist/ReactToastify.css', () => ({}));
+jest.mock('react-toastify', () => ({
+  ToastContainer: () => null,
+  toast: {
+    success: jest.fn(),
+    error: jest.fn(),
+  },
+}));
 
-const TABS = ['Log Analyzer', 'Metrics', 'Alerts'];
+jest.mock('axios', () => ({
+  get: jest.fn(() => Promise.resolve({ data: [] })),
+  post: jest.fn(() => Promise.resolve({ data: {} })),
+}));
 
-export default function App() {
-  const [activeTab, setActiveTab] = useState('Log Analyzer');
+jest.mock('./index.css', () => ({}));
 
-  return (
-    <div className="min-h-screen p-6">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-blue-400">🤖 DevOps AI Tool</h1>
-        <p className="text-slate-400 mt-1">Observability & Log Analysis powered by AI</p>
-      </header>
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import App from './App';
 
-      <nav className="flex gap-2 mb-6">
-        {TABS.map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === tab ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </nav>
+describe('App', () => {
+  it('renders the header', () => {
+    render(<App />);
+    expect(screen.getByText('🤖 DevOps AI Tool')).toBeInTheDocument();
+  });
 
-      <main>
-        {activeTab === 'Log Analyzer' && <LogAnalyzer />}
-        {activeTab === 'Metrics' && <MetricsDashboard />}
-        {activeTab === 'Alerts' && <AlertsPanel />}
-      </main>
+  it('renders all tab buttons', () => {
+    render(<App />);
+    expect(screen.getByText('Log Analyzer')).toBeInTheDocument();
+    expect(screen.getByText('Metrics')).toBeInTheDocument();
+    expect(screen.getByText('Alerts')).toBeInTheDocument();
+  });
 
-      <ToastContainer theme="dark" position="bottom-right" />
-    </div>
-  );
-}
+  it('shows Log Analyzer tab by default', () => {
+    render(<App />);
+    expect(screen.getByPlaceholderText('Paste your logs here...')).toBeInTheDocument();
+  });
+
+  it('switches to Metrics tab on click', async () => {
+    render(<App />);
+    await userEvent.click(screen.getByText('Metrics'));
+    expect(screen.getByText('Ingest Metric')).toBeInTheDocument();
+  });
+
+  it('switches to Alerts tab on click', async () => {
+    render(<App />);
+    await userEvent.click(screen.getByText('Alerts'));
+    expect(screen.getByText('Submit Alert for AI Analysis')).toBeInTheDocument();
+  });
+});
