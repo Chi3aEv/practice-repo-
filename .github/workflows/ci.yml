@@ -64,6 +64,8 @@ jobs:
 
       - name: Run tests
         run: npm test -- --watchAll=false --coverage
+        env:
+          CI: false
 
   build-frontend:
     runs-on: ubuntu-latest
