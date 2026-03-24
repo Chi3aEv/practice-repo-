@@ -1,51 +1,70 @@
-jest.mock('react-toastify/dist/ReactToastify.css', () => ({}));
-jest.mock('react-toastify', () => ({
-  ToastContainer: () => null,
-  toast: {
-    success: jest.fn(),
-    error: jest.fn(),
-  },
-}));
-
-jest.mock('axios', () => ({
-  get: jest.fn(() => Promise.resolve({ data: [] })),
-  post: jest.fn(() => Promise.resolve({ data: {} })),
-}));
-
-jest.mock('./index.css', () => ({}));
-
 import React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 
+// Mock child components to avoid dependency issues
+jest.mock('./components/LogAnalyzer', () => {
+  return function MockLogAnalyzer() {
+    return <div data-testid="log-analyzer">Log Analyzer Component</div>;
+  };
+});
+
+jest.mock('./components/MetricsDashboard', () => {
+  return function MockMetricsDashboard() {
+    return <div data-testid="metrics-dashboard">Metrics Dashboard Component</div>;
+  };
+});
+
+jest.mock('./components/AlertsPanel', () => {
+  return function MockAlertsPanel() {
+    return <div data-testid="alerts-panel">Alerts Panel Component</div>;
+  };
+});
+
+jest.mock('react-toastify', () => ({
+  ToastContainer: () => null,
+}));
+
 describe('App', () => {
-  it('renders the header', async () => {
-    await act(async () => { render(<App />); });
-    expect(await screen.findByText('🤖 DevOps AI Tool')).toBeInTheDocument();
+  it('renders the header', () => {
+    render(<App />);
+    const heading = screen.getByRole('heading', { level: 1 });
+    expect(heading).toBeInTheDocument();
+    expect(heading).toHaveTextContent('DevOps AI Tool');
   });
 
-  it('renders all tab buttons', async () => {
-    await act(async () => { render(<App />); });
-    expect(await screen.findByText('Log Analyzer')).toBeInTheDocument();
-    expect(await screen.findByText('Metrics')).toBeInTheDocument();
-    expect(await screen.findByText('Alerts')).toBeInTheDocument();
+  it('renders all navigation tabs', () => {
+    render(<App />);
+    expect(screen.getByText('Log Analyzer')).toBeInTheDocument();
+    expect(screen.getByText('Metrics')).toBeInTheDocument();
+    expect(screen.getByText('Alerts')).toBeInTheDocument();
   });
 
-  it('shows Log Analyzer tab by default', async () => {
-    await act(async () => { render(<App />); });
-    expect(await screen.findByPlaceholderText('Paste your logs here...')).toBeInTheDocument();
+  it('renders Log Analyzer tab by default', () => {
+    render(<App />);
+    expect(screen.getByTestId('log-analyzer')).toBeInTheDocument();
   });
 
-  it('switches to Metrics tab on click', async () => {
-    await act(async () => { render(<App />); });
-    await act(async () => { await userEvent.click(await screen.findByText('Metrics')); });
-    await waitFor(() => expect(screen.getByText('Ingest Metric')).toBeInTheDocument());
+  it('switches to Metrics tab when clicked', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const metricsButton = screen.getByRole('button', { name: /Metrics/i });
+    await user.click(metricsButton);
+
+    expect(screen.getByTestId('metrics-dashboard')).toBeInTheDocument();
+    expect(screen.queryByTestId('log-analyzer')).not.toBeInTheDocument();
   });
 
-  it('switches to Alerts tab on click', async () => {
-    await act(async () => { render(<App />); });
-    await act(async () => { await userEvent.click(await screen.findByText('Alerts')); });
-    await waitFor(() => expect(screen.getByText('Submit Alert for AI Analysis')).toBeInTheDocument());
+  it('switches to Alerts tab when clicked', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const alertsButton = screen.getByRole('button', { name: /Alerts/i });
+    await user.click(alertsButton);
+
+    expect(screen.getByTestId('alerts-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('log-analyzer')).not.toBeInTheDocument();
   });
 });

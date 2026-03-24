@@ -1,43 +1,32 @@
-import React, { useState } from 'react';
-import LogAnalyzer from './components/LogAnalyzer';
-import MetricsDashboard from './components/MetricsDashboard';
-import AlertsPanel from './components/AlertsPanel';
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import App from './App';
 import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
-const TABS = ['Log Analyzer', 'Metrics', 'Alerts'];
+// Mock react-toastify to avoid rendering issues in tests
+jest.mock('react-toastify', () => ({
+  ToastContainer: () => null,
+}));
 
-export default function App() {
-  const [activeTab, setActiveTab] = useState('Log Analyzer');
+describe('App', () => {
+  it('renders the header', () => {
+    render(<App />);
+    const heading = screen.getByRole('heading', { level: 1 });
+    expect(heading).toBeInTheDocument();
+    expect(heading).toHaveTextContent('DevOps AI Tool');
+  });
 
-  return (
-    <div className="min-h-screen p-6">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-blue-400">🤖 DevOps AI Tool</h1>
-        <p className="text-slate-400 mt-1">Observability & Log Analysis powered by AI</p>
-      </header>
+  it('renders navigation tabs', () => {
+    render(<App />);
+    expect(screen.getByText('Log Analyzer')).toBeInTheDocument();
+    expect(screen.getByText('Metrics')).toBeInTheDocument();
+    expect(screen.getByText('Alerts')).toBeInTheDocument();
+  });
 
-      <nav className="flex gap-2 mb-6">
-        {TABS.map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === tab ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </nav>
-
-      <main>
-        {activeTab === 'Log Analyzer' && <LogAnalyzer />}
-        {activeTab === 'Metrics' && <MetricsDashboard />}
-        {activeTab === 'Alerts' && <AlertsPanel />}
-      </main>
-
-      <ToastContainer theme="dark" position="bottom-right" />
-    </div>
-  );
-}
+  it('renders default tab content (Log Analyzer)', () => {
+    render(<App />);
+    // The LogAnalyzer component should be rendered by default
+    const mainElement = screen.getByRole('main');
+    expect(mainElement).toBeInTheDocument();
+  });
+});
