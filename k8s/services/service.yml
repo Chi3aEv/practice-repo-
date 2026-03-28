@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels:
+    app: devops-ai-tool
+    tier: backend
+spec:
+  selector:
+    app: devops-ai-tool
+    tier: backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels:
+    app: devops-ai-tool
+    tier: frontend
+spec:
+  selector:
+    app: devops-ai-tool
+    tier: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
