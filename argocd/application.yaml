@@ -6,8 +6,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/<your-username>/practice-repo-   # replace with your repo URL
-    targetRevision: HEAD
+    repoURL: https://github.com/Chi3aEv/practice-repo-.git   # replace with your repo URL
+    targetRevision: ci-branch
     path: helm/devops-ai-tool
     helm:
       valueFiles:
