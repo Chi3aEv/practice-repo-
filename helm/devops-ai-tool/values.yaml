@@ -1,0 +1,46 @@
+namespace: devops-ai
+
+backend:
+  name: backend
+  image:
+    repository: devops-ai-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 1
+  port: 5000
+  env:
+    logLevel: info
+    frontendUrl: http://localhost:3000
+  secret:
+    openaiApiKey: ""  # Set via --set backend.secret.openaiApiKey=<your-key>
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+frontend:
+  name: frontend
+  image:
+    repository: devops-ai-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 1
+  port: 80
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+ingress:
+  enabled: true
+  className: nginx
+  backend:
+    host: devops-ai-backend.local
+  frontend:
+    host: devops-ai-frontend.local
